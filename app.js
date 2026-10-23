@@ -6,18 +6,22 @@ function persist(){try{localStorage.setItem(STORE,JSON.stringify(S.answers))}cat
 function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("show");clearTimeout(S.timer);S.timer=setTimeout(()=>e.classList.remove("show"),1900)}
 function svgPicture(type){if(type==="tower")return '<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#e7edf0"/><circle cx="76" cy="19" r="9" fill="#f5d98b"/><path d="M48 16 L39 36 L45 36 L30 76 L42 76 L36 88 L64 88 L58 76 L70 76 L55 36 L61 36 Z" fill="#8a9c9e"/><path d="M48 16 L49 88 M39 46 L59 46 M35 63 L62 63 M32 77 L66 77" stroke="#f8f7f3" stroke-width="2"/><rect x="8" y="88" width="84" height="4" rx="2" fill="#b9c9c7"/></svg>';
 return '<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#f5e8cc"/><circle cx="78" cy="19" r="8" fill="#e8bd71"/><path d="M12 85 L42 48 L54 62 L67 39 L92 85 Z" fill="#c79a5e"/><path d="M42 48 L54 62 L67 39 L76 85 L25 85 Z" fill="#e1bb7c"/><path d="M50 59 L58 69 L49 69 Z" fill="#a87945"/><rect x="8" y="86" width="84" height="5" rx="2" fill="#b9a17a"/></svg>'}
-function layoutFor(){const pool=D.entries.map(e=>({...e,answer:norm(e.answer)})).filter(e=>e.answer.length>=3),g=new Map(),placed=[];
-function put(r,c,ch,picture){g.set(key(r,c),{r,c,ch,picture})}
-function candidate(w,r,c,dir,need){const dr=dir==="down"?1:0,dc=dir==="across"?1:0,isPic=!!w.image;if(isPic&&dir!=="across")return null;if(!isPic&&g.has(key(r-dr,c-dc)))return null;let cross=0;
-for(let i=0;i<w.answer.length;i++){const rr=r+dr*i,cc=c+dc*i,old=g.get(key(rr,cc));if(old&&old.ch!==w.answer[i])return null;if(old)cross++;/* В сканворде соседние клетки могут принадлежать другим словам: не запрещаем касание по бокам. */}
-if(g.has(key(r+dr*w.answer.length,c+dc*w.answer.length)))return null;
-if(isPic){for(let pr=r-1;pr<=r+1;pr++)for(let pc=c-3;pc<=c-1;pc++){const old=g.get(key(pr,pc));if(old&&!(pr===r&&pc===c-1&&old.ch==="@"))return null}if(g.has(key(r-1,c-2))||g.has(key(r+1,c-2)))return null}
-if(need&&!cross)return null;return {r,c,dir}}
-function place(w,p){const dr=p.dir==="down"?1:0,dc=p.dir==="across"?1:0,cells=[];if(w.image){for(let pr=p.r-1;pr<=p.r+1;pr++)for(let pc=p.c-3;pc<=p.c-1;pc++)put(pr,pc,"#",w.image);put(p.r,p.c-1,"@",w.image)}else put(p.r-dr,p.c-dc,"@");for(let i=0;i<w.answer.length;i++){const r=p.r+dr*i,c=p.c+dc*i;if(!g.has(key(r,c)))put(r,c,w.answer[i]);cells.push({r,c})}placed.push({...w,...p,cells})}
-const first=pool.find(e=>e.answer==="ГРАВИТАЦИЯ")||pool[0];place(first,{r:9,c:8,dir:"across"});const used=new Set([first.answer]);
-for(const w of pool){if(placed.length>=45)break;if(used.has(w.answer))continue;const opts=[];for(const old of placed)for(let i=0;i<w.answer.length;i++)for(let j=0;j<old.answer.length;j++)if(w.answer[i]===old.answer[j]){const rr=old.r+(old.dir==="down"?j:0),cc=old.c+(old.dir==="across"?j:0),p=old.dir==="across"?candidate(w,rr-i,cc,"down",true):candidate(w,rr,cc-i,"across",true);if(p)opts.push(p)}if(opts.length){place(w,opts[0]);used.add(w.answer)}}
-const all=[...g.values()],real=all.filter(x=>x.ch!=="@"&&x.ch!=="#"),minR=Math.min(...all.map(x=>x.r)),maxR=Math.max(...all.map(x=>x.r)),minC=Math.min(...all.map(x=>x.c)),maxC=Math.max(...all.map(x=>x.c)),grid=new Map();real.forEach(x=>grid.set(key(x.r-minR,x.c-minC),{r:x.r-minR,c:x.c-minC,ch:x.ch}));
-const entries=placed.map(e=>({...e,r:e.r-minR,c:e.c-minC,cells:e.cells.map(x=>({r:x.r-minR,c:x.c-minC}))}));entries.forEach(e=>{e.clueR=e.image?e.r-1:e.r-(e.dir==="down"?1:0);e.clueC=e.image?e.c-3:e.c-(e.dir==="across"?1:0)});for(const e of entries.filter(x=>x.image)){for(let rr=e.clueR;rr<e.clueR+3;rr++)for(let cc=e.clueC;cc<e.clueC+3;cc++)grid.set(key(rr,cc),{r:rr,c:cc,ch:"#"});grid.set(key(e.clueR,e.clueC),{r:e.clueR,c:e.clueC,ch:"@",picture:e.image,entry:e.answer})}return {grid,entries,rows:maxR-minR+1,cols:maxC-minC+1}}
+function layoutFor(){
+/* Первая тестовая доска: ровно 10 клеток в ширину и 23 в высоту.
+   В этой итерации слова располагаются плотными строками без пустых разделительных рядов. */
+const pool=D.entries.map(e=>({...e,answer:norm(e.answer)})).filter(e=>e.answer.length>=3&&!e.image&&e.answer.length<=9);
+const chosen=[],used=new Set();
+for(const e of pool){if(chosen.length===23)break;if(!used.has(e.answer)){chosen.push(e);used.add(e.answer)}}
+while(chosen.length<23){const e=pool[chosen.length%pool.length];chosen.push({...e,answer:e.answer.slice(0,9)})}
+const grid=new Map(),entries=[];
+for(let r=0;r<23;r++){
+ const e=chosen[r],cells=[];
+ grid.set(key(r,0),{r,c:0,ch:"@",clue:true});
+ for(let i=0;i<e.answer.length;i++){const c=i+1;grid.set(key(r,c),{r,c,ch:e.answer[i]});cells.push({r,c})}
+ entries.push({...e,r,c:1,dir:"across",cells,clueR:r,clueC:0});
+}
+return {grid,entries,rows:23,cols:10};
+}
 function solved(e){return e.cells.every((c,i)=>S.answers[key(c.r,c.c)]===e.answer[i])}
 function percent(){const cells=new Set();S.layout.entries.forEach(e=>e.cells.forEach(c=>cells.add(key(c.r,c.c))));let n=0;cells.forEach(k=>{if(S.answers[k])n++});return cells.size?Math.round(n/cells.size*100):0}
 function draw(){const L=S.layout,b=$("#board"),clues=new Map(),letters=new Map();L.entries.forEach((e,i)=>{clues.set(key(e.clueR,e.clueC),{e,i});e.cells.forEach(c=>{if(!letters.has(key(c.r,c.c)))letters.set(key(c.r,c.c),[]);letters.get(key(c.r,c.c)).push(e)})});
