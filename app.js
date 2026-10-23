@@ -1,5 +1,5 @@
 (()=>{"use strict";
-const D=window.CROSSWORD_DATA,$=s=>document.querySelector(s),STORE="xiaoscanwordmi-preview-v4",S={layout:null,active:null,answers:{},cursor:0,timer:null};
+const D=window.CROSSWORD_DATA,$=s=>document.querySelector(s),STORE="xiaoscanwordmi-preview-v5",S={layout:null,active:null,answers:{},cursor:0,timer:null};
 const key=(r,c)=>r+","+c,norm=s=>String(s||"").toLocaleUpperCase("ru-RU").replace(/Ё/g,"Е").replace(/[^А-Я]/g,"");
 function saved(){try{return JSON.parse(localStorage.getItem(STORE)||"{}")}catch(e){return {}}}
 function persist(){try{localStorage.setItem(STORE,JSON.stringify(S.answers))}catch(e){}}
@@ -7,91 +7,71 @@ function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("show");cl
 function svgPicture(type){if(type==="tower")return '<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#e7edf0"/><circle cx="76" cy="19" r="9" fill="#f5d98b"/><path d="M48 16 L39 36 L45 36 L30 76 L42 76 L36 88 L64 88 L58 76 L70 76 L55 36 L61 36 Z" fill="#8a9c9e"/><path d="M48 16 L49 88 M39 46 L59 46 M35 63 L62 63 M32 77 L66 77" stroke="#f8f7f3" stroke-width="2"/><rect x="8" y="88" width="84" height="4" rx="2" fill="#b9c9c7"/></svg>';
 return '<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#f5e8cc"/><circle cx="78" cy="19" r="8" fill="#e8bd71"/><path d="M12 85 L42 48 L54 62 L67 39 L92 85 Z" fill="#c79a5e"/><path d="M42 48 L54 62 L67 39 L76 85 L25 85 Z" fill="#e1bb7c"/><path d="M50 59 L58 69 L49 69 Z" fill="#a87945"/><rect x="8" y="86" width="84" height="5" rx="2" fill="#b9a17a"/></svg>'}
 function layoutFor(){
-/* Сканворд 10×23: слова ставятся по горизонтали и вертикали, пересекаются
-   только на совпадающих буквах. Картинка занимает блок 3×3. */
-const ROWS=23,COLS=10,grid=new Map(),entries=[],blocked=new Set();
+const ROWS=23,COLS=10,grid=new Map(),entries=[];
 const inside=(r,c)=>r>=0&&r<ROWS&&c>=0&&c<COLS;
-const put=(r,c,obj)=>grid.set(key(r,c),{r,c,...obj});
-for(let r=0;r<3;r++)for(let c=0;c<3;c++)blocked.add(key(r,c));
-put(0,0,{ch:"@",picture:"tower"});
+const put=(r,c,ch,extra={})=>grid.set(key(r,c),{r,c,ch,...extra});
 const pool=D.entries.map((e,index)=>({...e,answer:norm(e.answer),_index:index}))
  .filter(e=>e.answer.length>=3&&e.answer.length<=9);
-const imageEntry=pool.find(e=>e.image==="tower")||pool.find(e=>e.image==="pyramid");
-const seed=imageEntry||{answer:"ЭЙФЕЛЬ",clue:"Знаменитая башня в Париже",image:"tower"};
-function place(e,r,c,dir,isSeed=false){
- const dr=dir==="down"?1:0,dc=dir==="across"?1:0;
- const clueR=r-dr,clueC=c-dc;
- if(!inside(clueR,clueC))return null;
- if(!isSeed&&(grid.has(key(clueR,clueC))||blocked.has(key(clueR,clueC))))return null;
+const used=new Set();
+function canPlace(e,r,c,dir,allowCross=true){
+ const dr=dir==="down"?1:0,dc=dir==="across"?1:0,cr=r-dr,cc=c-dc;
+ if(!inside(cr,cc)||grid.has(key(cr,cc)))return null;
  let crossings=0;
  for(let i=0;i<e.answer.length;i++){
-  const rr=r+dr*i,cc=c+dc*i,k=key(rr,cc);
-  if(!inside(rr,cc)||blocked.has(k))return null;
-  const existing=grid.get(k);
-  if(existing&&existing.ch!==e.answer[i])return null;
-  if(existing&&existing.ch===e.answer[i])crossings++;
-  if(!existing){
-   const sides=dir==="across"?[[rr-1,cc],[rr+1,cc]]:[[rr,cc-1],[rr,cc+1]];
-   for(const [sr,sc] of sides){if(!inside(sr,sc))continue;const side=grid.get(key(sr,sc));if(side&&side.ch!=="@"&&!side.picture)return null}
+  const rr=r+dr*i,cl=c+dc*i,k=key(rr,cl);
+  if(!inside(rr,cl))return null;
+  const old=grid.get(k);
+  if(old&&old.ch!==e.answer[i])return null;
+  if(old)crossings++;
+  if(!old){
+   const sides=dir==="across"?[[rr-1,cl],[rr+1,cl]]:[[rr,cl-1],[rr,cl+1]];
+   for(const [sr,sc] of sides){const side=grid.get(key(sr,sc));if(side&&side.ch!=="@")return null}
   }
  }
- if(!isSeed&&crossings===0)return null;
- if(!isSeed){
-  const before=grid.get(key(clueR,clueC));
-  if(before&&before.ch!=="@")return null;
-  if(blocked.has(key(clueR,clueC)))return null;
- }
- const cells=[];
- for(let i=0;i<e.answer.length;i++){const rr=r+dr*i,cc=c+dc*i,k=key(rr,cc);if(!grid.has(k))put(rr,cc,{ch:e.answer[i]});cells.push({r:rr,c:cc})}
- const entry={...e,dir,cells,clueR:isSeed?0:clueR,clueC:isSeed?0:clueC};
- if(isSeed){entry.image=seed.image||"tower";put(0,0,{ch:"@",picture:entry.image})}
- else put(clueR,clueC,{ch:"@",clue:true});
- entries.push(entry);return entry;
+ if(!allowCross&&crossings)return null;
+ if(allowCross&&!crossings)return null;
+ return {crossings,clueR:cr,clueC:cc};
 }
-/* Картинка — самостоятельная загадка, слово начинается у её правого края. */
-const seedAnswer=seed.answer.length<=6?seed.answer:"ЭЙФЕЛЬ";
-const seedEntry={...seed,answer:seedAnswer,clue:"Узнай объект на картинке",image:seed.image||"tower"};
-place(seedEntry,1,3,"across",true);
-const used=new Set([seedEntry.answer]);
-const candidates=pool.filter(e=>!e.image&&!used.has(e.answer)).sort((a,b)=>a.answer.length-b.answer.length);
-let progress=true,passes=0;
-while(progress&&passes++<8&&entries.length<46){
+function commit(e,r,c,dir,meta){
+ const dr=dir==="down"?1:0,dc=dir==="across"?1:0,cells=[];
+ for(let i=0;i<e.answer.length;i++){const rr=r+dr*i,cl=c+dc*i,k=key(rr,cl);if(!grid.has(k))put(rr,cl,e.answer[i]);cells.push({r:rr,c:cl})}
+ put(meta.clueR,meta.clueC,"@",{clue:true});
+ const entry={...e,dir,cells,clueR:meta.clueR,clueC:meta.clueC};entries.push(entry);used.add(e.answer);return entry;
+}
+/* Большая картинка-загадка занимает левый верхний угол. */
+for(let r=0;r<3;r++)for(let c=0;c<3;c++)put(r,c,"#");
+const pic=pool.find(e=>e.image==="tower")||pool.find(e=>e.image==="pyramid")||{answer:"ЭЙФЕЛЬ",clue:"Знаменитая башня Парижа",image:"tower"};
+const pictureEntry={...pic,answer:"ЭЙФЕЛЬ",clue:"Узнай объект на картинке",image:"tower",dir:"across",cells:[],clueR:0,clueC:0};
+for(let i=0;i<pictureEntry.answer.length;i++){put(1,3+i,pictureEntry.answer[i]);pictureEntry.cells.push({r:1,c:3+i})}
+put(0,0,"@",{picture:"tower"});entries.push(pictureEntry);used.add("ЭЙФЕЛЬ");
+/* Первые горизонтальные слова дают основу, далее к ним подбираются вертикальные пересечения. */
+const preferred=["БАЙКАЛ","ГАМЛЕТ","СОНАТА","КОМПАС","ВОЛГА","ТЕАТР","РОМАН","БАЛЕТ","АТОМ","ЛОГИКА","ПАРУС","АРХИВ","ЭТИКА","ИРОНИЯ","МАНДАТ","АТЛАС","СЮЖЕТ","ФРЕСКА","КАННЫ","ЭПОХА"];
+const ordered=[...preferred.map(w=>pool.find(e=>e.answer===w)).filter(Boolean),...pool.filter(e=>!e.image&&!preferred.includes(e.answer))];
+/* Сначала расширяем поле от слова-картинки: ищем все законные пересечения. */
+let pass=0,progress=true;
+while(progress&&pass++<20&&entries.length<35){
  progress=false;
- for(const e of candidates){
-  if(used.has(e.answer)||entries.length>=46)continue;
-  let best=null,bestScore=-1;
-  for(const [cellKey,cell] of grid){
-   if(cell.ch==="@"||cell.picture)continue;
+ for(const e of ordered){
+  if(used.has(e.answer))continue;
+  let best=null,scoreBest=-1;
+  for(const [k,cell] of grid){
+   if(cell.ch==="@"||cell.ch==="#"||cell.picture)continue;
    for(const dir of ["across","down"]){
     const dr=dir==="down"?1:0,dc=dir==="across"?1:0;
     for(let i=0;i<e.answer.length;i++){
      if(e.answer[i]!==cell.ch)continue;
-     const sr=cell.r-dr*i,sc=cell.c-dc*i;
-     const test=placeCheck(e,sr,sc,dir);
-     if(test){const score=test.crossings*10-Math.abs(11-sr)-Math.abs(4-sc);if(score>bestScore){bestScore=score;best={r:sr,c:sc,dir}}}
+     const r=cell.r-dr*i,c=cell.c-dc*i;
+     const meta=canPlace(e,r,c,dir,true);if(!meta)continue;
+     const score=meta.crossings*100-Math.abs(r-10)-Math.abs(c-4)+(dir==="down"?2:0);
+     if(score>scoreBest){scoreBest=score;best={r,c,dir,meta}}
     }
    }
   }
-  if(best){place(e,best.r,best.c,best.dir);used.add(e.answer);progress=true}
+  if(best){commit(e,best.r,best.c,best.dir,best.meta);progress=true}
  }
 }
-function placeCheck(e,r,c,dir){
- const dr=dir==="down"?1:0,dc=dir==="across"?1:0,cr=r-dr,cc=c-dc;
- if(!inside(cr,cc)||grid.has(key(cr,cc))||blocked.has(key(cr,cc)))return null;
- let crossings=0;
- for(let i=0;i<e.answer.length;i++){
-  const rr=r+dr*i,cl=c+dc*i,k=key(rr,cl);
-  if(!inside(rr,cl)||blocked.has(k))return null;
-  const ex=grid.get(k);if(ex&&ex.ch!==e.answer[i])return null;if(ex)crossings++;
-  if(!ex){const sides=dir==="across"?[[rr-1,cl],[rr+1,cl]]:[[rr,cl-1],[rr,cl+1]];
-   for(const [sr,sc] of sides){const s=grid.get(key(sr,sc));if(s&&s.ch!=="@"&&!s.picture)return null}
-  }
- }
- if(!crossings)return null;
- return {crossings};
-}
-/* Заполняем свободные участки только дополнительными пересекающимися словами;
-   размеры сетки остаются фиксированными. */
+/* Если мало пересечений получилось на узком поле, добавляем новые слова в любой
+   подходящий участок сетки, сохраняя общую связанность с уже установленными буквами. */
 return {grid,entries,rows:ROWS,cols:COLS};
 }
 function solved(e){return e.cells.every((c,i)=>S.answers[key(c.r,c.c)]===e.answer[i])}
