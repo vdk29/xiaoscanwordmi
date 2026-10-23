@@ -1,18 +1,260 @@
 <!doctype html>
 <html lang="ru">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f8f7f3"><meta name="description" content="Большой классический сканворд с вопросами внутри поля.">
-<title>Ксяосканвордми — большой тестовый сканворд</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Literata:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css"><script src="data.js" defer></script><script src="app.js" defer></script>
-</head>
-<body>
-<header class="topbar"><a class="brand" href="./"><span class="brand-mark"><i></i><i></i><i></i><i></i></span><span>ксяо<span class="brand-light">сканвордми</span></span></a><span class="top-note">ТЕСТ МЕХАНИКИ · ЭРУДИЦИЯ</span><div class="top-actions"><button id="fullscreen" class="icon-button" title="На весь экран" aria-label="На весь экран">⛶</button><button id="reset" class="icon-button" title="Очистить ответы" aria-label="Очистить ответы">↺</button></div></header>
-<main><section class="intro"><div><span class="eyebrow">БОЛЬШОЙ СКАНВОРД · 01</span><h1>Большая эрудиция</h1><p>Нажми на клетку с вопросом или картинку, затем вводи ответ с клавиатуры. Следующее слово выбираешь сам.</p></div><div class="stats"><strong id="percent">0%</strong><span>заполнено</span></div></section>
-<div class="gamebar"><span><i class="legend pink"></i>вопрос</span><span><i class="legend yellow"></i>выбранное слово</span><span><i class="legend green"></i>верный ответ</span><span id="wordCount">Подготовка поля…</span></div>
-<section class="board-frame" id="boardFrame"><div id="board" class="board" role="grid" aria-label="Большой сканворд"></div></section>
-<footer><span id="status" role="status">Выбери вопрос на поле</span><span>Клавиатура: буквы · Backspace — удалить · стрелки — выбрать другое слово</span></footer>
-</main><div id="toast" class="toast" role="status"></div>
-</body></html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#f8f9f5" />
+    <meta
+      name="description"
+      content="Классические сканворды на русском. Бесплатно, без регистрации, с сохранением прогресса. Маленькая пауза с пользой для ума."
+    />
+    <title>ксяосканвордми — время для хороших слов</title>
+    <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="css/style.css" />
+    <script type="module" src="js/app.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="./" aria-label="ксяосканвордми — главная"
+          ><img src="assets/logo.svg" alt="" width="36" height="36" /><span
+            >ксяосканвордми<span class="brand-caption"
+              >сходится всё, даже слова</span
+            ></span
+          ></a
+        >
+        <nav aria-label="Основная навигация">
+          <a class="nav-link active" href="#catalog">Сканворды</a
+          ><button class="nav-link" data-help>
+            Как играть<span class="help-circle">?</span>
+          </button>
+        </nav>
+        <span class="header-note"><i></i> Без спешки. Без регистрации.</span>
+      </div>
+    </header>
+    <main class="home-main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <div class="eyebrow">
+            <span class="tiny-star">✳</span> МАЛЕНЬКИЙ РИТУАЛ ДЛЯ БОЛЬШИХ
+            МЫСЛЕЙ
+          </div>
+          <h1 id="hero-title">Время для<br />хороших <em>слов.</em></h1>
+          <p>
+            Завари чай, устройся поудобнее.<br />Найди своё слово — и немного
+            времени для себя.
+          </p>
+          <a href="#catalog" class="button primary"
+            >Выбрать сканворд <span data-icon="arrow"></span
+          ></a>
+          <div class="hero-benefits">
+            <span><i>✓</i> Всегда бесплатно</span
+            ><span><i>✓</i> Прогресс сохраняется</span>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <span class="art-spark spark-one">✳</span>
+          <div class="art-note">
+            пара слов —<br />и день приятнее<span>↙</span>
+          </div>
+          <div class="paper-grid">
+            <div class="paper-cell clue-art">
+              Спутник<br />Земли<span>↓</span>
+            </div>
+            <div class="paper-cell"></div>
+            <div class="paper-cell clue-art">
+              Усатый<br />питомец<span>↓</span>
+            </div>
+            <div class="paper-cell peach"></div>
+            <div class="paper-cell">Л</div>
+            <div class="paper-cell clue-art">
+              Зелёный<br />мир<span>↓</span>
+            </div>
+            <div class="paper-cell">К</div>
+            <div class="paper-cell"></div>
+            <div class="paper-cell">У</div>
+            <div class="paper-cell">Л</div>
+            <div class="paper-cell selected">О</div>
+            <div class="paper-cell"></div>
+            <div class="paper-cell">Н</div>
+            <div class="paper-cell">Е</div>
+            <div class="paper-cell">Т</div>
+            <div class="paper-cell clue-art">
+              Есть<br />контакт!<span>→</span>
+            </div>
+            <div class="paper-cell">А</div>
+            <div class="paper-cell">С</div>
+            <div class="paper-cell peach"></div>
+            <div class="paper-cell"></div>
+          </div>
+          <span class="art-sticker"
+            ><span data-icon="check"></span> Всё сходится!</span
+          ><span class="art-spark spark-two">✧</span>
+        </div>
+      </section>
+      <section
+        id="continue-section"
+        class="continue-section"
+        hidden
+        aria-label="Продолжить игру"
+      ></section>
+      <section
+        class="catalog-section"
+        id="catalog"
+        aria-labelledby="catalog-title"
+      >
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow muted">СЛОВО ЗА СЛОВОМ</div>
+            <h2 id="catalog-title">Какое у тебя настроение?</h2>
+          </div>
+          <p>Выбери свой темп. Остальное сложится.</p>
+        </div>
+        <div
+          class="difficulty-filters"
+          role="group"
+          aria-label="Выбор сложности"
+        >
+          <button
+            class="difficulty active"
+            data-level="all"
+            aria-pressed="true"
+          >
+            <span class="difficulty-symbol all-symbol">✳</span
+            ><span
+              ><strong>Все сканворды</strong
+              ><small>Найдётся что-то своё</small></span
+            ><span class="filter-count">9</span></button
+          ><button class="difficulty" data-level="1" aria-pressed="false">
+            <span class="difficulty-symbol level-1">1</span
+            ><span
+              ><strong>Легко и приятно</strong
+              ><small>Для первого знакомства</small></span
+            ><span class="level-bars"><i></i><i></i><i></i></span></button
+          ><button class="difficulty" data-level="2" aria-pressed="false">
+            <span class="difficulty-symbol level-2">2</span
+            ><span
+              ><strong>Есть над чем подумать</strong
+              ><small>Для любопытного ума</small></span
+            ><span class="level-bars medium"
+              ><i></i><i></i><i></i
+            ></span></button
+          ><button class="difficulty" data-level="3" aria-pressed="false">
+            <span class="difficulty-symbol level-3">3</span
+            ><span
+              ><strong>Принимаю вызов</strong
+              ><small>Для знатоков своего дела</small></span
+            ><span class="level-bars hard"><i></i><i></i><i></i></span>
+          </button>
+        </div>
+        <div class="catalog-toolbar">
+          <h3>Твоя следующая головоломка <span id="result-count">9</span></h3>
+          <label class="status-filter"
+            >Показать
+            <select id="status-filter" aria-label="Фильтр по прогрессу">
+              <option value="all">все</option>
+              <option value="new">новые</option>
+              <option value="started">начатые</option>
+              <option value="completed">разгаданные</option>
+            </select></label
+          >
+        </div>
+        <div class="puzzle-grid" id="puzzle-grid" aria-live="polite"></div>
+        <div class="generator-panel">
+          <div class="generator-mark" data-icon="spark"></div>
+          <div>
+            <strong>Хочется ещё одну?</strong>
+            <p>
+              Соберём новую сетку из нашего словаря и проверим каждое
+              пересечение.
+            </p>
+          </div>
+          <div class="generate-controls">
+            <select id="generate-level" aria-label="Сложность нового сканворда">
+              <option value="1">Лёгкий</option>
+              <option value="2">Средний</option>
+              <option value="3">Сложный</option></select
+            ><button class="button secondary" id="generate-button">
+              Новый сканворд <span data-icon="plus"></span>
+            </button>
+          </div>
+        </div>
+      </section>
+      <section class="progress-panel" aria-labelledby="progress-title">
+        <div class="progress-intro">
+          <span class="progress-icon" data-icon="trophy"></span>
+          <div>
+            <h2 id="progress-title">Твои маленькие победы</h2>
+            <p>Каждое найденное слово — уже хороший результат.</p>
+          </div>
+        </div>
+        <div class="personal-stats">
+          <div>
+            <strong id="stat-completed">0</strong
+            ><span>сканвордов разгадано</span>
+          </div>
+          <div><strong id="stat-words">0</strong><span>слов найдено</span></div>
+          <div>
+            <strong id="stat-time">0</strong><span>минут для себя</span>
+          </div>
+        </div>
+      </section>
+      <div class="home-bottom-note">
+        <span data-icon="book"></span>
+        <p>
+          Вопросы прямо в клетках. Ответы — где-то в голове.<br /><span
+            >Классические сканворды, которым всегда найдётся место в твоём
+            дне.</span
+          >
+        </p>
+      </div>
+    </main>
+    <footer class="site-footer">
+      <a class="footer-brand" href="./">ксяосканвордми<span>✳</span></a
+      ><span>Сделано для любопытных. И с любовью к словам.</span
+      ><button class="text-button" data-help>Как играть <span>→</span></button>
+    </footer>
+    <dialog id="help-dialog" class="modal">
+      <button class="icon-button modal-close" data-close aria-label="Закрыть">
+        <span data-icon="close"></span></button
+      ><span class="modal-symbol">А</span>
+      <div class="eyebrow">ВСЁ ПРОЩЕ, ЧЕМ КАЖЕТСЯ</div>
+      <h2>Одно слово за другим</h2>
+      <ol class="help-steps">
+        <li>
+          <strong>Выбери определение в сетке.</strong
+          ><span
+            >Стрелка → или ↓ показывает начало и направление ответа. ↳ начинает
+            ответ в клетке снизу и идёт вправо; ↴ — в клетке справа и идёт
+            вниз.</span
+          >
+        </li>
+        <li>
+          <strong>Впиши слово.</strong
+          ><span
+            >Нажимай русские буквы на экранной или обычной клавиатуре. Повторное
+            нажатие на пересечение меняет слово. Ё и Е равнозначны.</span
+          >
+        </li>
+        <li>
+          <strong>Не бойся исправлять.</strong
+          ><span
+            >Выбери любую букву, удали или замени её. «Проверить» отметит
+            ошибки, а подсказка откроет одну букву без ограничений.</span
+          >
+        </li>
+      </ol>
+      <p class="modal-footnote">
+        Прогресс хранится в этом браузере. Очистка данных сайта удалит
+        сохранения.
+      </p>
+    </dialog>
+    <div id="toast" class="toast" role="status"></div>
+    <noscript
+      ><p class="noscript">Для игры включи JavaScript в браузере.</p></noscript
+    >
+  </body>
+</html>
