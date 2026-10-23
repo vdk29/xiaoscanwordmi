@@ -1,0 +1,12 @@
+{
+  "name": "xiaoscanwordmi",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "validate": "node scripts/validate-puzzles.js",
+    "generate": "node scripts/prepare-puzzles.js",
+    "dev": "python3 -m http.server 4173"
+  }
+}

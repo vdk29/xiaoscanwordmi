@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#f8f9f5" />
+    <meta
+      name="description"
+      content="Классический сканворд с определениями в клетках и удобной русской клавиатурой."
+    />
+    <title>Сканворд — ксяосканвордми</title>
+    <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/game.css" />
+    <script type="module" src="js/game.js"></script>
+  </head>
+  <body class="game-page">
+    <header class="game-header">
+      <a href="./" class="game-back" aria-label="Вернуться к каталогу"
+        ><span data-icon="back"></span><span>К сканвордам</span></a
+      ><a class="brand" href="./"
+        ><img src="assets/logo.svg" alt="" width="30" height="30" /><span
+          >ксяосканвордми</span
+        ></a
+      ><button class="icon-button" data-help aria-label="Как играть">
+        <span class="help-circle">?</span>
+      </button>
+    </header>
+    <main id="game-main" class="game-main" hidden>
+      <section class="game-heading">
+        <div>
+          <span id="game-level" class="eyebrow"></span>
+          <h1 id="game-title"></h1>
+        </div>
+        <div class="game-stats">
+          <button
+            id="pause-button"
+            class="timer-button"
+            aria-label="Приостановить игру"
+          >
+            <span data-icon="pause"></span
+            ><span id="game-timer">00:00</span></button
+          ><span id="game-progress">0%</span>
+        </div>
+      </section>
+      <div class="game-progress-track">
+        <span id="game-progress-fill"></span>
+      </div>
+      <div class="play-layout">
+        <div class="board-area">
+          <div class="board-toolbar">
+            <span id="word-counter"></span>
+            <div class="zoom-controls">
+              <button
+                class="icon-button"
+                id="zoom-out"
+                aria-label="Уменьшить масштаб"
+              >
+                <span data-icon="minus"></span></button
+              ><span id="zoom-label">100%</span
+              ><button
+                class="icon-button"
+                id="zoom-in"
+                aria-label="Увеличить масштаб"
+              >
+                <span data-icon="plus"></span></button
+              ><button
+                class="icon-button"
+                id="zoom-fit"
+                aria-label="Поместить сетку в экран"
+                title="Поместить сетку в экран"
+              >
+                <span data-icon="fit"></span>
+              </button>
+            </div>
+          </div>
+          <div
+            class="board-viewport"
+            id="board-viewport"
+            tabindex="0"
+            aria-label="Игровое поле. Прокручивай или меняй масштаб двумя пальцами."
+          >
+            <div
+              id="board"
+              class="board"
+              role="grid"
+              aria-label="Сканворд с определениями в клетках"
+            ></div>
+          </div>
+          <div class="board-note">
+            <span>→ вправо · ↓ вниз · ↳ снизу вправо · ↴ справа вниз</span
+            ><button class="text-button" id="reset-button">
+              Начать заново <span data-icon="reset"></span>
+            </button>
+          </div>
+        </div>
+        <aside class="game-sidebar">
+          <section class="current-word">
+            <div class="current-word-top">
+              <span class="eyebrow">СЕЙЧАС ИЩЕМ СЛОВО</span
+              ><span id="clue-length"></span>
+            </div>
+            <div class="current-clue-row">
+              <span id="clue-direction"></span>
+              <h2 id="current-clue"></h2>
+            </div>
+            <div
+              id="answer-slots"
+              class="answer-slots"
+              aria-label="Буквы выбранного слова"
+            ></div>
+            <div class="word-navigation">
+              <button class="text-button" id="previous-word">
+                ← Предыдущее</button
+              ><span id="current-position"></span
+              ><button class="text-button" id="next-word">Следующее →</button>
+            </div>
+          </section>
+          <div class="game-actions">
+            <button class="button secondary" id="check-button">
+              <span data-icon="check"></span> Проверить</button
+            ><button class="button secondary" id="hint-button">
+              <span data-icon="bulb"></span> Буква-подсказка
+            </button>
+          </div>
+          <div
+            class="keyboard"
+            id="keyboard"
+            aria-label="Русская игровая клавиатура"
+          ></div>
+          <div class="keyboard-note">
+            Можно печатать на обычной клавиатуре.<br />Стрелки — перемещение ·
+            Enter — следующее слово
+          </div>
+          <div class="save-status" id="save-status">
+            <span></span> Всё сохраняется автоматически
+          </div>
+        </aside>
+      </div>
+    </main>
+    <section id="game-error" class="game-error" hidden>
+      <span>✳</span>
+      <h1>Этот сканворд не найден</h1>
+      <p>Выбери проверенную сетку из нашей коллекции.</p>
+      <a class="button primary" href="./">Открыть каталог</a>
+    </section>
+    <dialog id="help-dialog" class="modal">
+      <button class="icon-button modal-close" data-close aria-label="Закрыть">
+        <span data-icon="close"></span></button
+      ><span class="modal-symbol">А</span>
+      <div class="eyebrow">СЛОВО ЗА СЛОВОМ</div>
+      <h2>Всё обязательно сойдётся</h2>
+      <ol class="help-steps">
+        <li>
+          <strong>Начни с определения в клетке.</strong
+          ><span
+            >→ ведёт вправо, ↓ — вниз. ↳ начинает слово снизу и ведёт вправо, ↴
+            — справа и вниз. Полное определение появится рядом с полем.</span
+          >
+        </li>
+        <li>
+          <strong>Выбери букву и печатай.</strong
+          ><span
+            >Повторный тап на пересечении меняет направление. Удаление работает
+            с выбранной буквой. Ё и Е равнозначны.</span
+          >
+        </li>
+        <li>
+          <strong>Двигай поле, меняй масштаб.</strong
+          ><span
+            >На телефоне прокручивай пальцем и масштабируй двумя. Кнопка ⛶
+            помещает сетку в экран. «+» увеличит определения.</span
+          >
+        </li>
+        <li>
+          <strong>Проверь себя или возьми подсказку.</strong
+          ><span
+            >Ошибки выделятся коралловым. Подсказка откроет одну букву. Можно
+            исправлять любое слово.</span
+          >
+        </li>
+      </ol>
+      <p class="modal-footnote">
+        Прогресс и время хранятся в этом браузере на этом устройстве.
+      </p>
+    </dialog>
+    <dialog id="victory-dialog" class="modal victory-modal">
+      <button
+        class="icon-button modal-close"
+        id="victory-close"
+        aria-label="Закрыть"
+      >
+        <span data-icon="close"></span>
+      </button>
+      <div class="victory-art">
+        <span>✧</span><span data-icon="trophy"></span><span>✳</span>
+      </div>
+      <div class="eyebrow">ЕЩЁ ОДНА МАЛЕНЬКАЯ ПОБЕДА</div>
+      <h2>Все слова на своих местах!</h2>
+      <p>
+        Отличная получилась пауза.<br />Можно гордиться собой — и заварить ещё
+        чаю.
+      </p>
+      <div id="victory-stats" class="victory-stats"></div>
+      <a href="./" class="button primary"
+        >Выбрать следующий <span data-icon="arrow"></span
+      ></a>
+    </dialog>
+    <dialog id="reset-dialog" class="modal">
+      <h2>Начать с чистого листа?</h2>
+      <p>Ответы, подсказки и время этого сканворда будут сброшены.</p>
+      <div class="modal-actions">
+        <button class="button secondary" id="reset-cancel">
+          Оставить как есть</button
+        ><button class="button primary" id="reset-confirm">
+          Начать заново
+        </button>
+      </div>
+    </dialog>
+    <dialog id="pause-dialog" class="modal pause-modal">
+      <span class="modal-symbol" data-icon="pause"></span>
+      <div class="eyebrow">МОЖНО НИКУДА НЕ СПЕШИТЬ</div>
+      <h2>Слова тебя дождутся</h2>
+      <p>Игра на паузе. Время остановлено.</p>
+      <button class="button primary" id="resume-button">
+        Продолжить <span data-icon="play"></span></button
+      ><a class="text-button" href="./">Вернуться к каталогу</a>
+    </dialog>
+    <div id="toast" class="toast" role="status"></div>
+    <noscript><p class="noscript">Для игры включи JavaScript.</p></noscript>
+  </body>
+</html>
