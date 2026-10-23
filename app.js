@@ -9,7 +9,7 @@ return '<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#f5e8cc"
 function layoutFor(){const pool=D.entries.map(e=>({...e,answer:norm(e.answer)})).filter(e=>e.answer.length>=3),g=new Map(),placed=[];
 function put(r,c,ch,picture){g.set(key(r,c),{r,c,ch,picture})}
 function candidate(w,r,c,dir,need){const dr=dir==="down"?1:0,dc=dir==="across"?1:0,isPic=!!w.image;if(isPic&&dir!=="across")return null;if(!isPic&&g.has(key(r-dr,c-dc)))return null;let cross=0;
-for(let i=0;i<w.answer.length;i++){const rr=r+dr*i,cc=c+dc*i,old=g.get(key(rr,cc));if(old&&old.ch!==w.answer[i])return null;if(old)cross++;if(!old&&(dir==="across"?(g.has(key(rr-1,cc))||g.has(key(rr+1,cc))):(g.has(key(rr,cc-1))||g.has(key(rr,cc+1)))))return null}
+for(let i=0;i<w.answer.length;i++){const rr=r+dr*i,cc=c+dc*i,old=g.get(key(rr,cc));if(old&&old.ch!==w.answer[i])return null;if(old)cross++;/* В сканворде соседние клетки могут принадлежать другим словам: не запрещаем касание по бокам. */}
 if(g.has(key(r+dr*w.answer.length,c+dc*w.answer.length)))return null;
 if(isPic){for(let pr=r-1;pr<=r+1;pr++)for(let pc=c-3;pc<=c-1;pc++){const old=g.get(key(pr,pc));if(old&&!(pr===r&&pc===c-1&&old.ch==="@"))return null}if(g.has(key(r-1,c-2))||g.has(key(r+1,c-2)))return null}
 if(need&&!cross)return null;return {r,c,dir}}
