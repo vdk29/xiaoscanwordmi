@@ -21,9 +21,9 @@ function layoutFor(p){
    if(old.dir==="across"){let x=candidate(w,rr-i,cc,"down",true);if(x)opts.push(x)}
    else{let x=candidate(w,rr,cc-i,"across",true);if(x)opts.push(x)}
   }
-  if(opts.length){let pos=opts[Math.floor(Math.random()*opts.length)];place(w,pos);used.add(w.answer)}
+  if(opts.length){let pos=opts[0];place(w,pos);used.add(w.answer)}
  }
- let real=[...g.values()].filter(x=>x.ch!=="@"),minR=Math.min(...real.map(x=>x.r)),maxR=Math.max(...real.map(x=>x.r)),minC=Math.min(...real.map(x=>x.c)),maxC=Math.max(...real.map(x=>x.c)),ng=new Map();
+ let all=[...g.values()],real=all.filter(x=>x.ch!=="@"),minR=Math.min(...all.map(x=>x.r)),maxR=Math.max(...all.map(x=>x.r)),minC=Math.min(...all.map(x=>x.c)),maxC=Math.max(...all.map(x=>x.c)),ng=new Map();
  real.forEach(x=>ng.set(key(x.r-minR,x.c-minC),{r:x.r-minR,c:x.c-minC,ch:x.ch}));
  let es=placed.map(e=>({...e,r:e.r-minR,c:e.c-minC,cells:e.cells.map(x=>({r:x.r-minR,c:x.c-minC}))}));es.forEach(e=>{e.clueR=e.r-(e.dir==="down"?1:0);e.clueC=e.c-(e.dir==="across"?1:0)});
  return {grid:ng,entries:es,rows:maxR-minR+1,cols:maxC-minC+1}
