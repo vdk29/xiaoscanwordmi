@@ -60,16 +60,16 @@ while(progress&&passes++<8&&entries.length<46){
  for(const e of candidates){
   if(used.has(e.answer)||entries.length>=46)continue;
   let best=null,bestScore=-1;
-  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)for(const dir of ["across","down"]){
-   const dr=dir==="down"?1:0,dc=dir==="across"?1:0;
-   if(!inside(r-(dir==="down"?1:0),c-(dir==="across"?1:0)))continue;
-   for(let i=0;i<e.answer.length;i++){
-    const rr=r+dr*i,cc=c+dc*i,cell=grid.get(key(rr,cc));
-    if(!cell||cell.ch!==e.answer[i])continue;
-    /* Привязываем новое слово к общей букве и проверяем весь путь. */
-    const sr=r-dr*i,sc=c-dc*i;
-    const test=(()=>{const t=placeCheck(e,sr,sc,dir);return t})()
-    if(test){const score=test.crossings*10-Math.abs(11-r)-Math.abs(4-c);if(score>bestScore){bestScore=score;best={r:sr,c:sc,dir}}}
+  for(const [cellKey,cell] of grid){
+   if(cell.ch==="@"||cell.picture)continue;
+   for(const dir of ["across","down"]){
+    const dr=dir==="down"?1:0,dc=dir==="across"?1:0;
+    for(let i=0;i<e.answer.length;i++){
+     if(e.answer[i]!==cell.ch)continue;
+     const sr=cell.r-dr*i,sc=cell.c-dc*i;
+     const test=placeCheck(e,sr,sc,dir);
+     if(test){const score=test.crossings*10-Math.abs(11-sr)-Math.abs(4-sc);if(score>bestScore){bestScore=score;best={r:sr,c:sc,dir}}}
+    }
    }
   }
   if(best){place(e,best.r,best.c,best.dir);used.add(e.answer);progress=true}
