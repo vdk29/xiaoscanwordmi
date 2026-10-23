@@ -18,8 +18,8 @@ function layoutFor(p){
  for(let w of pool){if(placed.length>=9)break;if(used.has(w.answer))continue;let opts=[];
   for(let old of placed)for(let i=0;i<w.answer.length;i++)for(let j=0;j<old.answer.length;j++)if(w.answer[i]===old.answer[j]){
    let rr=old.r+(old.dir==="down"?j:0),cc=old.c+(old.dir==="across"?j:0);
-   if(old.dir==="across"){let x=candidate(w,rr,cc-i,"down",true);if(x)opts.push(x)}
-   else{let x=candidate(w,rr-i,cc,"across",true);if(x)opts.push(x)}
+   if(old.dir==="across"){let x=candidate(w,rr-i,cc,"down",true);if(x)opts.push(x)}
+   else{let x=candidate(w,rr,cc-i,"across",true);if(x)opts.push(x)}
   }
   if(opts.length){let pos=opts[Math.floor(Math.random()*opts.length)];place(w,pos);used.add(w.answer)}
  }
