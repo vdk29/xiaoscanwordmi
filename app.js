@@ -36,6 +36,7 @@ $("#board").addEventListener("click",ev=>{const cl=ev.target.closest("[data-entr
 document.addEventListener("keydown",ev=>{if(ev.metaKey||ev.ctrlKey||ev.altKey||/INPUT|TEXTAREA/.test(ev.target.tagName))return;if(/^[а-яё]$/i.test(ev.key)||["Backspace","Delete","ArrowRight","ArrowLeft","ArrowUp","ArrowDown"].includes(ev.key)){ev.preventDefault();keyboard(ev.key)}});
 $("#reset").addEventListener("click",()=>{S.answers={};persist();draw();toast("Поле очищено")});
 $("#fullscreen").addEventListener("click",async()=>{try{if(!document.fullscreenElement){await document.documentElement.requestFullscreen();document.body.classList.add("fullscreen-mode")}else{await document.exitFullscreen();document.body.classList.remove("fullscreen-mode")}}catch(e){document.body.classList.toggle("fullscreen-mode")}});
-document.addEventListener("fullscreenchange",()=>document.body.classList.toggle("fullscreen-mode",!!document.fullscreenElement));window.addEventListener("resize",()=>{if(S.layout)draw()});
+document.addEventListener("fullscreenchange",()=>document.body.classList.toggle("fullscreen-mode",!!document.fullscreenElement));
+const frame=$("#boardFrame");frame.addEventListener("wheel",ev=>{const dx=ev.shiftKey?ev.deltaY:ev.deltaX,dy=ev.shiftKey?0:ev.deltaY;const canX=frame.scrollWidth>frame.clientWidth,canY=frame.scrollHeight>frame.clientHeight;if((canX&&dx)||(canY&&dy)){ev.preventDefault();if(canX)frame.scrollLeft+=dx;if(canY)frame.scrollTop+=dy}},{passive:false});window.addEventListener("resize",()=>{if(S.layout)draw()});
 S.layout=layoutFor();S.answers=saved();S.active=S.layout.entries[0]||null;draw();
 })();
