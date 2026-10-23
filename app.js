@@ -1,5 +1,5 @@
 (()=>{"use strict";
-const D=window.CROSSWORD_DATA,$=s=>document.querySelector(s),STORE="xiaoscanwordmi-bigtest-v2",S={layout:null,active:null,answers:{},cursor:0,timer:null};
+const D=window.CROSSWORD_DATA,$=s=>document.querySelector(s),STORE="xiaoscanwordmi-preview-v3",S={layout:null,active:null,answers:{},cursor:0,timer:null};
 const key=(r,c)=>r+","+c,norm=s=>String(s||"").toLocaleUpperCase("ru-RU").replace(/Ё/g,"Е").replace(/[^А-Я]/g,"");
 function saved(){try{return JSON.parse(localStorage.getItem(STORE)||"{}")}catch(e){return {}}}
 function persist(){try{localStorage.setItem(STORE,JSON.stringify(S.answers))}catch(e){}}
@@ -38,5 +38,5 @@ $("#reset").addEventListener("click",()=>{S.answers={};persist();draw();toast("�
 $("#fullscreen").addEventListener("click",async()=>{try{if(!document.fullscreenElement){await document.documentElement.requestFullscreen();document.body.classList.add("fullscreen-mode")}else{await document.exitFullscreen();document.body.classList.remove("fullscreen-mode")}}catch(e){document.body.classList.toggle("fullscreen-mode")}});
 document.addEventListener("fullscreenchange",()=>document.body.classList.toggle("fullscreen-mode",!!document.fullscreenElement));
 const frame=$("#boardFrame");frame.addEventListener("wheel",ev=>{const dx=ev.shiftKey?ev.deltaY:ev.deltaX,dy=ev.shiftKey?0:ev.deltaY;const canX=frame.scrollWidth>frame.clientWidth,canY=frame.scrollHeight>frame.clientHeight;if((canX&&dx)||(canY&&dy)){ev.preventDefault();if(canX)frame.scrollLeft+=dx;if(canY)frame.scrollTop+=dy}},{passive:false});window.addEventListener("resize",()=>{if(S.layout)draw()});
-S.layout=layoutFor();S.answers=saved();S.active=S.layout.entries[0]||null;draw();
+S.layout=layoutFor();S.answers=saved();if(!Object.keys(S.answers).length){S.layout.entries.forEach(e=>e.cells.forEach((cell,i)=>{S.answers[key(cell.r,cell.c)]=e.answer[i]}));persist()}S.active=S.layout.entries[0]||null;draw();
 })();
