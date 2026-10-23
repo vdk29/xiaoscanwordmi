@@ -1,5 +1,5 @@
 (()=>{"use strict";
-const D=window.CROSSWORD_DATA,$=s=>document.querySelector(s),STORE="xiaoscanwordmi-preview-v5",S={layout:null,active:null,answers:{},cursor:0,timer:null};
+const D=window.CROSSWORD_DATA,$=s=>document.querySelector(s),STORE="xiaoscanwordmi-preview-v6",S={layout:null,active:null,answers:{},cursor:0,timer:null};
 const key=(r,c)=>r+","+c,norm=s=>String(s||"").toLocaleUpperCase("ru-RU").replace(/Ё/g,"Е").replace(/[^А-Я]/g,"");
 function saved(){try{return JSON.parse(localStorage.getItem(STORE)||"{}")}catch(e){return {}}}
 function persist(){try{localStorage.setItem(STORE,JSON.stringify(S.answers))}catch(e){}}
@@ -25,7 +25,7 @@ function canPlace(e,r,c,dir,allowCross=true){
   if(old)crossings++;
   if(!old){
    const sides=dir==="across"?[[rr-1,cl],[rr+1,cl]]:[[rr,cl-1],[rr,cl+1]];
-   for(const [sr,sc] of sides){const side=grid.get(key(sr,sc));if(side&&side.ch!=="@")return null}
+   for(const [sr,sc] of sides){const side=grid.get(key(sr,sc));if(side&&side.ch!=="@"&&side.ch!=="#")return null}
   }
  }
  if(!allowCross&&crossings)return null;
